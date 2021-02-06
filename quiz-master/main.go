@@ -8,35 +8,47 @@ import (
 	"strings"
 )
 
+type questions struct {
+	Question string
+	Answer   string
+}
+
+
 func main() {
 	questionAndAnswer := readCSV()
 	totalQuestion := 0
 	score := 0
+
 	fmt.Println("================= Quiz Game ====================")
 	for _, qa := range questionAndAnswer {
 		totalQuestion++
-		if userAnswer(qa[0]) == qa[1] {
+		q := questions{
+			Question: qa[0],
+			Answer: qa[1],
+		}
+		ans := q.askQuestion()
+		if q.isCorrect(ans) {
 			score++
 		}
 		fmt.Printf("You score %v/%v \n", score, totalQuestion)
 	}
 	fmt.Println("================ Game Over ==============================")
 	fmt.Printf("Your total score is %v out of %v", score, totalQuestion)
-
 }
 
-type questions struct {
-	Question string
-	Answer   string
-}
+func (q questions) isCorrect(userInput string) bool {
+	if userInput == q.Answer{
+		return true
+	}
+	return false
+} 
 
-func userAnswer(question string) string {
-	fmt.Print(question + ": ")
+func (q questions) askQuestion() string {
+	fmt.Print(q.Question + ": ")
 	reader := bufio.NewReader(os.Stdin)
 	input, _ := reader.ReadString('\n')
 	input = strings.TrimSpace(input)
 	return input
-
 }
 
 func readCSV() [][]string {
@@ -44,7 +56,6 @@ func readCSV() [][]string {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println("Successfully Opened CSV file")
 	defer csvFile.Close()
 
 	csvLines, err := csv.NewReader(csvFile).ReadAll()
